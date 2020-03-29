@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="TokenBasedAccess:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/TokenBasedAccess_jar</output-path>
+    <root id="archive" name="TokenBasedAccess.jar">
+      <element id="module-output" name="TokenBasedAccess" />
+      <element id="module-output" name="Simulation" />
+    </root>
+  </artifact>
+</component>
