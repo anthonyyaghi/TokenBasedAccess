@@ -86,7 +86,7 @@ public class MenuController {
         }
         Parent root;
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("sim.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("sim.fxml"));
             root = loader.load();
 
             SimController controller = loader.getController();
