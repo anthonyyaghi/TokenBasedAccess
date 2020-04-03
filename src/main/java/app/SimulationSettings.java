@@ -8,12 +8,13 @@ public class SimulationSettings {
     private double[] initArr;
     private boolean genCsv;
     private boolean simpleTime;
-    private double interArrTime;
+    private double[] interArrTime;
     private double txTime;
     private double shortTxTime;
     private double longTxTime;
     private double timeOutTime;
     private double switchOverTime;
+    private boolean withPriority;
 
     public SimulationSettings() {
     }
@@ -74,11 +75,11 @@ public class SimulationSettings {
         this.simpleTime = simpleTime;
     }
 
-    public double getInterArrTime() {
+    public double[] getInterArrTime() {
         return interArrTime;
     }
 
-    public void setInterArrTime(double interArrTime) {
+    public void setInterArrTime(double[] interArrTime) {
         this.interArrTime = interArrTime;
     }
 
@@ -120,5 +121,13 @@ public class SimulationSettings {
 
     public void setLongTxTime(double longTxTime) {
         this.longTxTime = longTxTime;
+    }
+
+    public boolean isWithPriority() {
+        return withPriority;
+    }
+
+    public void setWithPriority(boolean withPriority) {
+        this.withPriority = withPriority;
     }
 }

@@ -1,7 +1,9 @@
 package simulation.util;
 
+import simulation.queue.SimQueue;
+
 public interface TimeProvider {
-    double getInterArrTime();
+    double getInterArrTime(SimQueue queue);
 
     double getTxTime();
 

@@ -12,6 +12,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -42,6 +43,9 @@ public class MenuController {
     private CheckBox csvCheckBox;
 
     @FXML
+    private CheckBox priorityCheckBox;
+
+    @FXML
     private ComboBox<Integer> nbQCombo;
 
     @FXML
@@ -63,7 +67,6 @@ public class MenuController {
         nbQChanged();
 
         simDurationText.textProperty().addListener(new DigitFieldListener(simDurationText));
-        interArrTime.textProperty().addListener(new DigitFieldListener(interArrTime));
         shortTxTime.textProperty().addListener(new DigitFieldListener(shortTxTime));
         longTxTime.textProperty().addListener(new DigitFieldListener(longTxTime));
         txTime.textProperty().addListener(new DigitFieldListener(txTime));
@@ -93,21 +96,21 @@ public class MenuController {
 
             SimulationSettings settings = new SimulationSettings();
 
+            // Simulation duration
             settings.setReplayDur(Double.parseDouble(simDurationText.getText()));
+            // Number of queues
             settings.setNbQ(nbQCombo.getValue());
+            // Priority
+            settings.setWithPriority(priorityCheckBox.isSelected());
+            // Initial queue with the token
             settings.setTokenHolder(tokenHolderCombo.getValue());
+            // Generate csv file option
             settings.setGenCsv(csvCheckBox.isSelected());
-            settings.setInterArrTime(Double.parseDouble(interArrTime.getText()));
+            //Time out value
             settings.setTimeOutTime(Double.parseDouble(timeOutTime.getText()));
+            // Switch over value
             settings.setSwitchOverTime(Double.parseDouble(switchOverTime.getText()));
-            settings.setSimpleTime(simpleTime.isSelected());
-            if (simpleTime.isSelected()) {
-                settings.setTxTime(Double.parseDouble(txTime.getText()));
-            } else {
-                settings.setShortTxTime(Double.parseDouble(shortTxTime.getText()));
-                settings.setLongTxTime(Double.parseDouble(longTxTime.getText()));
-            }
-
+            // Initial arrival time
             double[] initArr = getInitArr();
             if (!randomInitValues.isSelected() && initArr == null) {
                 displayWarning("Invalid format for initial arrival clocks\n" +
@@ -120,7 +123,27 @@ public class MenuController {
                 randomInitValues.setSelected(true);
             }
             settings.setInitArr(initArr);
+            // Random init
             settings.setRandomInit(randomInitValues.isSelected());
+            // Inter-arrival times
+            double[] interArr = getInterArr();
+            if (interArr == null) {
+                displayWarning("Invalid format for inter arrival clocks\n" +
+                        "Starting simulation with simple time provider and inter arrival time of 8");
+                simpleTime.setSelected(true);
+                interArr = new double[settings.getNbQ()];
+                Arrays.fill(initArr, 8);
+            }
+            settings.setInterArrTime(interArr);
+            // Time provider type
+            settings.setSimpleTime(simpleTime.isSelected());
+            // Tx time
+            if (simpleTime.isSelected()) {
+                settings.setTxTime(Double.parseDouble(txTime.getText()));
+            } else {
+                settings.setShortTxTime(Double.parseDouble(shortTxTime.getText()));
+                settings.setLongTxTime(Double.parseDouble(longTxTime.getText()));
+            }
 
             controller.load(settings);
 
@@ -139,6 +162,14 @@ public class MenuController {
     private double[] getInitArr() {
         try {
             return Stream.of(initialValuesText.getText().split(",")).mapToDouble(v -> Double.parseDouble(v)).toArray();
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private double[] getInterArr() {
+        try {
+            return Stream.of(interArrTime.getText().split(",")).mapToDouble(v -> Double.parseDouble(v)).toArray();
         } catch (NumberFormatException e) {
             return null;
         }

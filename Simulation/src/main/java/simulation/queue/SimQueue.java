@@ -9,18 +9,22 @@ import simulation.events.TimeOutEvent;
 import java.util.PriorityQueue;
 
 public class SimQueue {
+    private int id;
     private PriorityQueue<SimPacket> queue;
     private Simulation sim;
     private TimeOutEvent timeOutEvent;
     private double arrClock;
     private double depClock;
+    private SimPacket activePacket;
+    private PacketPriority nextPacketPr;
+    boolean withPriority;
 
-    public SimQueue(Simulation sim, double firstArrival) {
+    public SimQueue(int id, Simulation sim, boolean withPriority) {
+        this.id = id;
         this.sim = sim;
+        this.withPriority = withPriority;
 
         queue = new PriorityQueue<>();
-
-        scheduleArrival(firstArrival, PacketPriority.HIGH_PRIORITY);
 
         depClock = -1;
     }
@@ -34,11 +38,11 @@ public class SimQueue {
         } else {
             pr = PacketPriority.HIGH_PRIORITY;
         }
-        scheduleArrival(sim.getTime() + sim.getTimeProvider().getInterArrTime(), pr);
+        scheduleArrival(sim.getTime() + sim.getTimeProvider().getInterArrTime(this), pr);
     }
 
     public void serviceCompletion() {
-        queue.poll();
+        activePacket = null;
 
         if (queue.isEmpty()) {
             passToken();
@@ -62,11 +66,19 @@ public class SimQueue {
     }
 
     public long countHP() {
-        return queue.stream().filter(packet -> packet.getPriority()==PacketPriority.HIGH_PRIORITY).count();
+        long qSize = queue.stream().filter(packet -> packet.getPriority()==PacketPriority.HIGH_PRIORITY).count();
+        if (activePacket != null && activePacket.getPriority() == PacketPriority.HIGH_PRIORITY) {
+            qSize += 1;
+        }
+        return qSize;
     }
 
     public long countLP() {
-        return queue.stream().filter(packet -> packet.getPriority()==PacketPriority.LOW_PRIORITY).count();
+        long qSize = queue.stream().filter(packet -> packet.getPriority()==PacketPriority.LOW_PRIORITY).count();
+        if (activePacket != null && activePacket.getPriority() == PacketPriority.LOW_PRIORITY) {
+            qSize += 1;
+        }
+        return qSize;
     }
 
     public double getArrClock() {
@@ -77,16 +89,30 @@ public class SimQueue {
         return depClock;
     }
 
-    //    ==================================================================================================================
+    public int getId() {
+        return id;
+    }
 
-    private void scheduleArrival(double arrClock, PacketPriority pr) {
+    public void scheduleArrival(double arrClock, PacketPriority pr) {
         sim.scheduleEvent(new PacketArrivalEvent(this, new SimPacket(pr),
                 arrClock));
+        nextPacketPr = pr;
         this.arrClock = arrClock;
     }
 
+    public int getActivePacket() {
+        return activePacket == null ? -1 : activePacket.getPriority().ordinal();
+    }
+
+    public PacketPriority getNextPacketPr() {
+        return nextPacketPr;
+    }
+
+    //    ==================================================================================================================
+
     private void scheduleDep() {
         this.depClock = sim.getTime() + sim.getTimeProvider().getTxTime();
+        activePacket = queue.poll();
         sim.scheduleEvent(new PacketDepartEvent(this, depClock));
     }
 
@@ -103,10 +129,20 @@ public class SimQueue {
 
     @Override
     public String toString() {
-        return "{" +
-                "size=" + queue.size() +
-                " arrClock=" + arrClock +
-                " depClock=" + depClock +
-                "}";
+        String desc = "{" +
+                "arrClock=" + arrClock +
+                " depClock=" + depClock;
+        if (!withPriority)  {
+            desc += " size=" + ((activePacket == null ? 0 : 1) + queue.size()) +
+                    "}";
+        } else {
+            desc += " HPsize=" + countHP() +
+                    " LPsize=" + countLP() +
+                    " Packet in transmission=" + (activePacket != null ? activePacket.getPriority().toString() : "none") +
+                    " Next packet=" + nextPacketPr.toString() +
+                    "}";
+        }
+
+        return desc;
     }
 }

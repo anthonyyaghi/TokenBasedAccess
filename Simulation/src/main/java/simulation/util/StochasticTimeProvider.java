@@ -1,13 +1,15 @@
 package simulation.util;
 
+import simulation.queue.SimQueue;
+
 public class StochasticTimeProvider implements TimeProvider {
-    private double interArrTimeMean;
+    private double[] interArrTimeMean;
     private double shortTxTimeMean;
     private double longTxTimeMean;
     private double timeOut;
     private double switchOverTime;
 
-    public StochasticTimeProvider(double interArrTimeMean, double shortTxTimeMean, double longTxTimeMean,
+    public StochasticTimeProvider(double[] interArrTimeMean, double shortTxTimeMean, double longTxTimeMean,
                                   double timeOut, double switchOverTime) {
         this.interArrTimeMean = interArrTimeMean;
         this.shortTxTimeMean = shortTxTimeMean;
@@ -17,8 +19,8 @@ public class StochasticTimeProvider implements TimeProvider {
     }
 
     @Override
-    public double getInterArrTime() {
-        return sampleExp(1. / interArrTimeMean);
+    public double getInterArrTime(SimQueue queue) {
+        return sampleExp(1. / interArrTimeMean[queue.getId()]);
     }
 
     @Override

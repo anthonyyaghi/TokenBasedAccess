@@ -46,22 +46,22 @@ public class SimController {
 
         Simulation sim;
         if (settings.isRandomInit()) {
-            sim = new Simulation(settings.getNbQ(), settings.getTokenHolder(), timeProvider);
+            sim = new Simulation(settings.getNbQ(), settings.getTokenHolder(), timeProvider, settings.isWithPriority());
         } else {
-            sim = new Simulation(settings.getNbQ(), settings.getTokenHolder(), settings.getInitArr(), timeProvider);
+            sim = new Simulation(settings.getNbQ(), settings.getTokenHolder(), settings.getInitArr(), timeProvider, settings.isWithPriority());
         }
 
         List<Memory> memories = new ArrayList<>();
         Memory latest;
         do {
-            latest = sim.simulate(true);
+            latest = sim.simulate();
             memories.add(latest);
         } while (latest.getTime() <= settings.getReplayDur());
 
         // Output to csv file
         if (settings.isGenCsv()) {
             CsvWriter writer = new CsvWriter("output.csv");
-            writer.printMemoryToCsvFile(memories);
+            writer.printMemoryToCsvFile(memories, settings.isWithPriority());
         }
 
         GraphicsContext gc = canvas.getGraphicsContext2D();

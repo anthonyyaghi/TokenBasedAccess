@@ -1,12 +1,14 @@
 package simulation.util;
 
+import simulation.queue.SimQueue;
+
 public class SimpleTimeProvider implements TimeProvider {
-    private double interArrTime;
+    private double[] interArrTime;
     private double txTime;
     private double timeOut;
     private double switchOverTime;
 
-    public SimpleTimeProvider(double interArrTime, double txTime, double timeOut, double switchOverTime) {
+    public SimpleTimeProvider(double[] interArrTime, double txTime, double timeOut, double switchOverTime) {
         this.interArrTime = interArrTime;
         this.txTime = txTime;
         this.timeOut = timeOut;
@@ -14,8 +16,8 @@ public class SimpleTimeProvider implements TimeProvider {
     }
 
     @Override
-    public double getInterArrTime() {
-        return interArrTime;
+    public double getInterArrTime(SimQueue queue) {
+        return interArrTime[queue.getId()];
     }
 
     @Override
